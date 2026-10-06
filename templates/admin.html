@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Staff Panel · CrowdCloud{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <h1>Staff Panel</h1>
+  <p>Call the next customer, complete or cancel tickets. Actions apply immediately.</p>
+  <div class="overall-line">
+    Overall status:
+    <span class="load-badge" id="overallBadge" data-load="{{ stats.overall_load }}">{{ stats.overall_load }}</span>
+  </div>
+</section>
+
+<section class="admin-grid" id="adminGrid">
+  {% for section in sections %}
+  <article class="admin-card" data-service="{{ section.service.code }}">
+    <header class="card-head">
+      <h2>{{ section.service.name }}</h2>
+      <span class="load-badge" data-role="load">{{ section.service.load }}</span>
+    </header>
+
+    <div class="admin-stats">
+      <span><strong data-role="waiting">{{ section.service.waiting }}</strong> waiting</span>
+      <span><strong data-role="serving">{{ section.service.serving }}</strong> in service</span>
+      <span><strong data-role="done">{{ section.service.done_today }}</strong> done today</span>
+    </div>
+
+    <div class="admin-actions">
+      <button type="button" class="btn btn-primary call-next"
+              data-code="{{ section.service.code }}">
+        Call next
+      </button>
+      <button type="button" class="btn btn-ghost refresh-card" data-code="{{ section.service.code }}">
+        Refresh
+      </button>
+    </div>
+
+    <table class="queue-table admin-table">
+      <thead>
+        <tr><th>Ticket</th><th>Customer</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody data-role="tickets-body">
+        {% for t in section.tickets %}
+        <tr data-number="{{ t.ticket_number }}">
+          <td class="mono">{{ t.ticket_number }}</td>
+          <td>{{ t.customer_name or '—' }}</td>
+          <td><span class="status-pill status-{{ t.status|lower }}">{{ t.status }}</span></td>
+          <td class="row-actions">
+            {% if t.status == 'WAITING' %}
+            <button class="mini-btn act-serve" data-number="{{ t.ticket_number }}">Serve</button>
+            <button class="mini-btn act-cancel" data-number="{{ t.ticket_number }}">Cancel</button>
+            {% elif t.status == 'SERVING' %}
+            <button class="mini-btn act-complete" data-number="{{ t.ticket_number }}">Complete</button>
+            {% else %}
+            <span class="muted">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr class="empty-row"><td colspan="4">No tickets yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

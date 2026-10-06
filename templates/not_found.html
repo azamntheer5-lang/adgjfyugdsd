@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Not found · CrowdCloud{% endblock %}
+
+{% block content %}
+<section class="page-head center">
+  <h1>Ticket not found</h1>
+  <p>No ticket named <strong class="mono">{{ ticket_number }}</strong> exists.
+     It may have been removed by a database reset.</p>
+  <p><a class="btn btn-primary" href="{{ url_for('views.index') }}">Back to services</a></p>
+</section>
+{% endblock %}

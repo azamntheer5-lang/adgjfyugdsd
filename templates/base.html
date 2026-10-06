@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CrowdCloud{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="{{ url_for('views.index') }}">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+          <path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <strong>CrowdCloud</strong>
+        <small>Smart queue &amp; load management</small>
+      </span>
+    </a>
+    <nav class="site-nav">
+      <a href="{{ url_for('views.index') }}" class="nav-link">Services</a>
+      <a href="{{ url_for('views.queue_board') }}" class="nav-link">Queue Board</a>
+      <a href="{{ url_for('views.admin') }}" class="nav-link">Staff Panel</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    CrowdCloud &middot; Cloud Computing &amp; Distributed Systems (3CCN314)
+    &middot; Working prototype &mdash; NORMAL / BUSY / HIGH LOAD
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

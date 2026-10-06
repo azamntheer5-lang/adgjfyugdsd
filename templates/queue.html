@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Queue Board · CrowdCloud{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <h1>Queue Board</h1>
+  <p>Live waiting lists per service &mdash; refreshed automatically.</p>
+  <div class="overall-line">
+    Overall status:
+    <span class="load-badge" id="overallBadge" data-load="{{ stats.overall_load }}">{{ stats.overall_load }}</span>
+    &middot; <span id="totalWaiting">{{ stats.waiting }}</span> customers waiting
+  </div>
+</section>
+
+<section class="queue-grid" id="queueGrid">
+  {% for board in boards %}
+  <article class="queue-card" data-service="{{ board.service.code }}">
+    <header class="card-head">
+      <h2>{{ board.service.name }}</h2>
+      <span class="load-badge" data-role="load">{{ board.service.load }}</span>
+    </header>
+
+    <div class="now-serving">
+      <dt>In service</dt>
+      <dd data-role="serving-count">{{ board.service.serving }}</dd>
+    </div>
+
+    <table class="queue-table">
+      <thead>
+        <tr><th>#</th><th>Ticket</th><th>Customer</th><th>Since</th></tr>
+      </thead>
+      <tbody data-role="waiting-body">
+        {% for t in board.waiting %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td class="mono">{{ t.ticket_number }}</td>
+          <td>{{ t.customer_name or '—' }}</td>
+          <td class="muted">{{ t.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr class="empty-row"><td colspan="4">No one is waiting &mdash; queue is clear.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="queue-count">
+      <strong data-role="waiting">{{ board.service.waiting }}</strong> waiting
+    </p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

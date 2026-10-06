@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Services · CrowdCloud{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-text">
+    <h1>Choose a service and get your ticket</h1>
+    <p>
+      CrowdCloud issues a queue ticket for every request and tracks the live
+      pressure on each service. The status badge changes from
+      <span class="pill pill-normal">NORMAL</span> to
+      <span class="pill pill-busy">BUSY</span> and
+      <span class="pill pill-high">HIGH LOAD</span> as the queue grows.
+    </p>
+  </div>
+  <div class="hero-stats" id="globalStats" aria-live="polite">
+    <div class="gstat">
+      <span class="gstat-label">Overall status</span>
+      <span class="gstat-value"><span class="load-badge" id="overallBadge" data-load="{{ stats.overall_load }}">{{ stats.overall_load }}</span></span>
+    </div>
+    <div class="gstat">
+      <span class="gstat-label">Waiting now</span>
+      <span class="gstat-value" id="totalWaiting">{{ stats.waiting }}</span>
+    </div>
+    <div class="gstat">
+      <span class="gstat-label">Served today</span>
+      <span class="gstat-value" id="servedToday">{{ stats.done_today }}</span>
+    </div>
+    <div class="gstat">
+      <span class="gstat-label">Tickets today</span>
+      <span class="gstat-value" id="ticketsToday">{{ stats.created_today }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="services-grid" id="servicesGrid">
+  {% for s in services %}
+  <article class="service-card" data-service="{{ s.code }}">
+    <header class="card-head">
+      <h2>{{ s.name }}</h2>
+      <span class="load-badge" data-role="load">{{ s.load }}</span>
+    </header>
+    <p class="service-desc">{{ s.description }}</p>
+    <dl class="service-stats">
+      <div><dt>Waiting</dt><dd data-role="waiting">{{ s.waiting }}</dd></div>
+      <div><dt>Now serving</dt><dd data-role="serving">{{ s.serving }}</dd></div>
+      <div><dt>Served today</dt><dd data-role="done">{{ s.done_today }}</dd></div>
+    </dl>
+    <div class="load-meter" title="Queue pressure toward HIGH LOAD">
+      <div class="load-meter-fill" data-role="meter" style="width: {{ s.load_percent }}%"></div>
+    </div>
+    <p class="thresholds-hint">
+      BUSY at {{ s.busy_threshold }} waiting &middot; HIGH LOAD at {{ s.high_threshold }}
+    </p>
+    <button type="button" class="btn btn-primary btn-block get-ticket"
+            data-code="{{ s.code }}" data-name="{{ s.name }}">
+      Get a Ticket
+    </button>
+  </article>
+  {% endfor %}
+</section>
+
+<!-- Get-ticket dialog -->
+<div class="modal-backdrop" id="ticketModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Get a ticket</h3>
+    <p class="modal-service" id="modalService">—</p>
+    <form id="ticketForm">
+      <label for="customerName">Your name <span class="muted">(optional)</span></label>
+      <input id="customerName" name="customer_name" type="text" maxlength="60"
+             autocomplete="off" placeholder="e.g. Ali">
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modalCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="modalSubmit">Issue Ticket</button>
+      </div>
+      <p class="modal-error" id="modalError" hidden></p>
+    </form>
+  </div>
+</div>
+{% endblock %}
