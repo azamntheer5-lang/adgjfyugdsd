@@ -1,0 +1,69 @@
+CrowdCloud worker-scaling benchmark (gunicorn on port 5001)
+
+>>> Gunicorn workers = 1
+URL:                http://127.0.0.1:5001/api/services
+Method:             GET   body=no
+Requests:           1000  (concurrency 50)
+Completed:          1000
+Successful (2xx):   1000
+Failed:             0
+Requests/second:    657.65
+Wall time (s):      1.521
+Latency (ms):  min=4.1  mean=73.08  p50=73.15  p90=86.18  p95=96.65  p99=97.72  max=99.27
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/scaling_read_w1.json
+URL:                http://127.0.0.1:5001/api/tickets
+Method:             POST   body=yes
+Requests:           500  (concurrency 25)
+Completed:          500
+Successful (2xx):   500
+Failed:             0
+Requests/second:    538.31
+Wall time (s):      0.929
+Latency (ms):  min=5.62  mean=44.48  p50=44.77  p90=48.92  p95=51.63  p99=60.07  max=60.38
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/scaling_write_w1.json
+
+>>> Gunicorn workers = 2
+URL:                http://127.0.0.1:5001/api/services
+Method:             GET   body=no
+Requests:           1000  (concurrency 50)
+Completed:          1000
+Successful (2xx):   1000
+Failed:             0
+Requests/second:    932.11
+Wall time (s):      1.073
+Latency (ms):  min=2.48  mean=49.12  p50=41.19  p90=66.6  p95=67.75  p99=68.37  max=68.89
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/scaling_read_w2.json
+URL:                http://127.0.0.1:5001/api/tickets
+Method:             POST   body=yes
+Requests:           500  (concurrency 25)
+Completed:          500
+Successful (2xx):   500
+Failed:             0
+Requests/second:    758.08
+Wall time (s):      0.66
+Latency (ms):  min=2.85  mean=30.72  p50=26.55  p90=48.44  p95=50.26  p99=51.23  max=52.4
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/scaling_write_w2.json
+
+>>> Gunicorn workers = 4
+URL:                http://127.0.0.1:5001/api/services
+Method:             GET   body=no
+Requests:           1000  (concurrency 50)
+Completed:          1000
+Successful (2xx):   1000
+Failed:             0
+Requests/second:    1027.58
+Wall time (s):      0.973
+Latency (ms):  min=3.02  mean=38.98  p50=35.84  p90=61.63  p95=62.94  p99=65.61  max=70.18
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/scaling_read_w4.json
+URL:                http://127.0.0.1:5001/api/tickets
+Method:             POST   body=yes
+Requests:           500  (concurrency 25)
+Completed:          500
+Successful (2xx):   500
+Failed:             0
+Requests/second:    903.39
+Wall time (s):      0.553
+Latency (ms):  min=1.58  mean=24.3  p50=20.88  p90=45.52  p95=47.61  p99=50.49  max=54.26
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/scaling_write_w4.json
+
+Scaling results saved under: /home/z/my-project/github-clone/benchmarks/results (scaling_read_w*.json / scaling_write_w*.json)

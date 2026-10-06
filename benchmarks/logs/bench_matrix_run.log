@@ -1,0 +1,153 @@
+CrowdCloud benchmark matrix — target: http://127.0.0.1:5000
+Python: 3.12.14
+
+>>> [control_healthz_L2] GET /healthz  (n=500, c=10)
+URL:                http://127.0.0.1:5000/healthz
+Method:             GET   body=no
+Requests:           500  (concurrency 10)
+Completed:          500
+Successful (2xx):   500
+Failed:             0
+Requests/second:    2083.76
+Wall time (s):      0.24
+Latency (ms):  min=0.4  mean=2.85  p50=1.97  p90=5.0  p95=7.08  p99=24.54  max=29.36
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/control_healthz_L2.json
+
+>>> [control_healthz_L3] GET /healthz  (n=1000, c=50)
+URL:                http://127.0.0.1:5000/healthz
+Method:             GET   body=no
+Requests:           1000  (concurrency 50)
+Completed:          1000
+Successful (2xx):   1000
+Failed:             0
+Requests/second:    2405.17
+Wall time (s):      0.416
+Latency (ms):  min=0.35  mean=3.36  p50=1.4  p90=6.94  p95=10.89  p99=30.35  max=34.54
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/control_healthz_L3.json
+
+>>> [home_page_L1] GET /  (n=200, c=1)
+URL:                http://127.0.0.1:5000/
+Method:             GET   body=no
+Requests:           200  (concurrency 1)
+Completed:          200
+Successful (2xx):   200
+Failed:             0
+Requests/second:    638.22
+Wall time (s):      0.313
+Latency (ms):  min=1.38  mean=1.56  p50=1.5  p90=1.64  p95=1.7  p99=1.84  max=10.96
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/home_page_L1.json
+
+>>> [api_services_L1] GET /api/services  (n=200, c=1)
+URL:                http://127.0.0.1:5000/api/services
+Method:             GET   body=no
+Requests:           200  (concurrency 1)
+Completed:          200
+Successful (2xx):   200
+Failed:             0
+Requests/second:    676.94
+Wall time (s):      0.295
+Latency (ms):  min=1.24  mean=1.47  p50=1.37  p90=1.78  p95=1.83  p99=2.12  max=5.35
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/api_services_L1.json
+
+>>> [home_page_L2] GET /  (n=500, c=10)
+URL:                http://127.0.0.1:5000/
+Method:             GET   body=no
+Requests:           500  (concurrency 10)
+Completed:          500
+Successful (2xx):   500
+Failed:             0
+Requests/second:    981.21
+Wall time (s):      0.51
+Latency (ms):  min=1.13  mean=8.07  p50=5.43  p90=14.66  p95=31.74  p99=40.3  max=50.03
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/home_page_L2.json
+
+>>> [api_services_L2] GET /api/services  (n=500, c=10)
+URL:                http://127.0.0.1:5000/api/services
+Method:             GET   body=no
+Requests:           500  (concurrency 10)
+Completed:          500
+Successful (2xx):   500
+Failed:             0
+Requests/second:    976.33
+Wall time (s):      0.512
+Latency (ms):  min=0.92  mean=7.24  p50=5.03  p90=14.87  p95=29.01  p99=36.83  max=41.22
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/api_services_L2.json
+
+>>> [home_page_L3] GET /  (n=1000, c=50)
+URL:                http://127.0.0.1:5000/
+Method:             GET   body=no
+Requests:           1000  (concurrency 50)
+Completed:          1000
+Successful (2xx):   1000
+Failed:             0
+Requests/second:    905.65
+Wall time (s):      1.104
+Latency (ms):  min=1.13  mean=28.38  p50=23.81  p90=58.5  p95=63.92  p99=78.98  max=96.74
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/home_page_L3.json
+
+>>> [api_services_L3] GET /api/services  (n=1000, c=50)
+URL:                http://127.0.0.1:5000/api/services
+Method:             GET   body=no
+Requests:           1000  (concurrency 50)
+Completed:          1000
+Successful (2xx):   1000
+Failed:             0
+Requests/second:    1027.82
+Wall time (s):      0.973
+Latency (ms):  min=1.0  mean=20.82  p50=14.75  p90=48.82  p95=57.81  p99=67.7  max=83.3
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/api_services_L3.json
+
+>>> [api_ticket_create_L1] POST /api/tickets  (n=200, c=1)
+URL:                http://127.0.0.1:5000/api/tickets
+Method:             POST   body=yes
+Requests:           200  (concurrency 1)
+Completed:          200
+Successful (2xx):   200
+Failed:             0
+Requests/second:    651.41
+Wall time (s):      0.307
+Latency (ms):  min=1.4  mean=1.53  p50=1.48  p90=1.6  p95=1.68  p99=3.3  max=4.38
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/api_ticket_create_L1.json
+    (DB now holds 200 tickets after this level)
+
+>>> [api_ticket_create_L2] POST /api/tickets  (n=500, c=10)
+URL:                http://127.0.0.1:5000/api/tickets
+Method:             POST   body=yes
+Requests:           500  (concurrency 10)
+Completed:          500
+Successful (2xx):   500
+Failed:             0
+Requests/second:    812.19
+Wall time (s):      0.616
+Latency (ms):  min=1.23  mean=8.97  p50=6.29  p90=19.82  p95=29.48  p99=37.39  max=79.38
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/api_ticket_create_L2.json
+    (DB now holds 500 tickets after this level)
+
+>>> [api_ticket_create_L3] POST /api/tickets  (n=1000, c=50)
+URL:                http://127.0.0.1:5000/api/tickets
+Method:             POST   body=yes
+Requests:           1000  (concurrency 50)
+Completed:          1000
+Successful (2xx):   1000
+Failed:             0
+Requests/second:    805.8
+Wall time (s):      1.241
+Latency (ms):  min=1.28  mean=32.13  p50=25.62  p90=69.25  p95=91.43  p99=118.33  max=146.08
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/api_ticket_create_L3.json
+    (DB now holds 1000 tickets after this level)
+
+>>> [api_ticket_create_L4] POST /api/tickets  (n=2000, c=100)
+URL:                http://127.0.0.1:5000/api/tickets
+Method:             POST   body=yes
+Requests:           2000  (concurrency 100)
+Completed:          2000
+Successful (2xx):   2000
+Failed:             0
+Requests/second:    767.84
+Wall time (s):      2.605
+Latency (ms):  min=1.4  mean=72.05  p50=72.91  p90=129.29  p95=144.26  p99=168.82  max=182.24
+Saved JSON -> /home/z/my-project/github-clone/benchmarks/results/api_ticket_create_L4.json
+    (DB now holds 2000 tickets after this level)
+
+All raw results saved under: /home/z/my-project/github-clone/benchmarks/results
+Summarise them with:  python3 benchmarks/summarize.py

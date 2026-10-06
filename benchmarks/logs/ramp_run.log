@@ -1,0 +1,23 @@
+=== READ RAMP: GET /api/services at levels [10, 25, 50, 100, 200, 400, 800] ===
+  [read] c=  10  n= 1500 ... RPS=   905.2  mean=    8.4ms  p95=   30.5ms  p99=   41.5ms  failed=0
+  [read] c=  25  n= 1500 ... RPS=  1012.9  mean=   19.5ms  p95=   46.9ms  p99=   62.1ms  failed=0
+  [read] c=  50  n= 1500 ... RPS=   985.5  mean=   32.2ms  p95=   76.8ms  p99=   83.8ms  failed=0
+  [read] c= 100  n= 1500 ... RPS=   995.4  mean=   37.8ms  p95=   90.1ms  p99=  100.8ms  failed=0
+  [read] c= 200  n= 1500 ... RPS=  1009.8  mean=   30.0ms  p95=   82.3ms  p99=  113.7ms  failed=0
+  [read] c= 400  n= 2000 ... RPS=   968.4  mean=   85.5ms  p95=  243.6ms  p99=  284.6ms  failed=0
+  [read] c= 800  n= 4000 ... RPS=   975.3  mean=   70.2ms  p95=  200.6ms  p99=  282.1ms  failed=0
+=== WRITE RAMP: POST /api/tickets at levels [10, 25, 50, 100, 200, 400, 800] ===
+  [write] c=  10  n= 3000 ... RPS=   716.4  mean=   12.1ms  p95=   36.6ms  p99=   45.5ms  failed=0
+  [write] c=  25  n= 3000 ... RPS=   676.9  mean=   29.3ms  p95=   60.0ms  p99=   68.9ms  failed=0
+  [write] c=  50  n= 3000 ... RPS=   708.3  mean=   56.0ms  p95=   97.5ms  p99=  108.6ms  failed=0
+  [write] c= 100  n= 3000 ... RPS=   651.9  mean=   98.0ms  p95=  237.4ms  p99=  277.2ms  failed=0
+  [write] c= 200  n= 3000 ... RPS=   650.0  mean=  134.9ms  p95=  282.4ms  p99=  407.0ms  failed=0
+  [write] c= 400  n= 4000 ... RPS=   582.4  mean=  241.7ms  p95=  804.4ms  p99=  883.0ms  failed=0
+  [write] c= 800  n= 8000 ... RPS=   464.8  mean=  730.0ms  p95= 1822.1ms  p99= 2195.1ms  failed=0
+
+Raw JSON results saved to benchmarks/results/ramp_test.json
+Markdown summary saved to benchmarks/results/ramp_test.md
+
+=== RAMP SUMMARY ===
+READ : peak 1012.91 RPS @ c=25 | knee c=400 | first failure c=None
+WRITE: peak 716.44 RPS @ c=10 | knee c=100 | first failure c=None

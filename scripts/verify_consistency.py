@@ -100,7 +100,7 @@ def main() -> int:
                 lm = r["latency_ms"]
                 chk(f"ramp {r['label']}: completed == success + failed",
                     r["completed"] == r["success"] + r["failed"])
-                chk(f"ramp {r['label}: percentile order",
+                chk(f"ramp {r['label']}: percentile order",
                     lm["p50"] <= lm["p95"] <= lm["p99"] <= lm["max"])
         total_ramp = sum(r["requests"] for r in levels)
         fails_ramp = sum(r["failed"] for r in levels)
