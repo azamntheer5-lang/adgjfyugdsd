@@ -30,10 +30,18 @@ GUNI_PID=$!
 trap 'kill $GUNI_PID 2>/dev/null || true' EXIT
 
 # wait for readiness
+READY=0
 for i in $(seq 1 40); do
-  curl -sfL "$BASE/healthz" > /dev/null 2>&1 && break
+  if curl -sfL "$BASE/healthz" > /dev/null 2>&1; then READY=1; break; fi
+  # if the master died, show why instead of waiting the full 20 s
+  if ! kill -0 "$GUNI_PID" 2>/dev/null; then break; fi
   sleep 0.5
 done
+if [ "$READY" -ne 1 ]; then
+  echo "!! server did not become ready — gunicorn log follows:"
+  cat /tmp/qa_gunicorn.log 2>/dev/null || true
+  exit 1
+fi
 
 echo; echo "=== 1. health & pages ==="
 H=$(curl -sfL -o /dev/null -w '%{http_code}' "$BASE/healthz"); check "GET /healthz" "200" "$H"

@@ -47,3 +47,13 @@ jobs:
 
       - name: Run QA smoke against Gunicorn (same settings as Dockerfile)
         run: bash scripts/qa_smoke.sh http://127.0.0.1:5055
+
+      - name: Upload smoke logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-logs
+          path: |
+            /tmp/qa_gunicorn.log
+            /tmp/qa_gunicorn2.log
+          if-no-files-found: ignore
