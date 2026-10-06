@@ -11,6 +11,7 @@ Design notes
 
 import os
 import sqlite3
+import time
 
 from flask import current_app, g
 
@@ -76,16 +77,38 @@ CREATE INDEX IF NOT EXISTS idx_tickets_created
 """
 
 
+def _apply_pragmas(conn: sqlite3.Connection) -> None:
+    """Configure one SQLite connection for safe multi-worker access.
+
+    ``PRAGMA journal_mode=WAL`` needs a brief exclusive moment when the
+    database is not in WAL mode yet.  When several Gunicorn workers boot
+    at the same time on a fresh database, this pragma can collide with
+    SQLITE_BUSY — and unlike normal write locks, that particular busy is
+    NOT covered by busy_timeout, so the worker would crash at boot
+    (observed on GitHub Actions runners).  Retrying briefly closes the
+    race window; once any single connection has switched the database to
+    WAL, the pragma becomes a harmless no-op for everyone else.
+    """
+    conn.execute("PRAGMA busy_timeout=15000")
+    for attempt in range(50):
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+            break
+        except sqlite3.OperationalError as exc:
+            if "locked" not in str(exc).lower() or attempt == 49:
+                raise
+            time.sleep(0.1)
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA foreign_keys=ON")
+
+
 def get_conn() -> sqlite3.Connection:
     """Return the per-request SQLite connection."""
     if "db" not in g:
         conn = sqlite3.connect(current_app.config["DB_PATH"], timeout=15)
         conn.row_factory = sqlite3.Row
         conn.isolation_level = None  # autocommit; explicit BEGIN for transactions
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA busy_timeout=15000")
-        conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("PRAGMA foreign_keys=ON")
+        _apply_pragmas(conn)
         g.db = conn
     return g.db
 
@@ -107,19 +130,24 @@ def init_app(app):
 
 
 def init_db():
-    """Create tables (if missing) and seed the four services."""
+    """Create tables (if missing) and seed the four services.
+
+    Safe under the multi-worker boot race: BEGIN IMMEDIATE serialises the
+    seed transaction, and INSERT OR IGNORE keeps a second worker that
+    already sees rows from a crashing UNIQUE violation.
+    """
     conn = get_conn()
     conn.executescript(SCHEMA)
     row = conn.execute("SELECT COUNT(*) AS c FROM services").fetchone()
     if row["c"] == 0:
         conn.execute("BEGIN IMMEDIATE")
         conn.executemany(
-            "INSERT INTO services (code, prefix, name, description) "
+            "INSERT OR IGNORE INTO services (code, prefix, name, description) "
             "VALUES (?, ?, ?, ?)",
             SERVICES,
         )
         conn.execute(
-            "INSERT INTO service_counters (service_id, last_number) "
+            "INSERT OR IGNORE INTO service_counters (service_id, last_number) "
             "SELECT id, 0 FROM services"
         )
         conn.execute("COMMIT")
