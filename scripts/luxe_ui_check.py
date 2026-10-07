@@ -45,6 +45,10 @@ def run():
         failed_resources = []
         def on_response(r):
             if r.status >= 400 and r.request.resource_type != "document":
+                # 409 on POST /api/tickets is the intentional duplicate-ID
+                # rejection tested below - not a failure.
+                if r.status == 409 and "/api/tickets" in r.url and r.request.method == "POST":
+                    return
                 failed_resources.append(f"{r.status} {r.url}")
         page.on("response", on_response)
 
@@ -94,19 +98,38 @@ def run():
 
         # ---------- 6. issue a ticket (full flow) ----------
         page.click('.service-card[data-service=it_support] .get-ticket')
+        # name-only submit is blocked → validation message
         page.fill("#customerName", "عبدالله")
+        page.click("#modalSubmit")
+        page.wait_for_timeout(300)
+        check("modal: missing student id → arabic validation", "رقمًا جامعيًا" in (page.text_content("#modalError") or ""))
+        page.fill("#studentId", "441002357")
         page.click("#modalSubmit")
         page.wait_for_url(re.compile(r"/ticket/IT-\d+"), timeout=8000)
         ticket_no = page.url.rsplit("/", 1)[-1]
         check("ticket: redirected to ticket page", ticket_no.startswith("IT-"))
         check("ticket: big number shown", page.text_content('[data-role="number"]').strip() == ticket_no)
+        check("ticket: student id shown", page.text_content('[data-role="student-id"]').strip() == "441002357")
+        check("ticket: customer name shown", page.text_content('[data-role="customer"]').strip() == "عبدالله")
         check("ticket: status arabic", page.text_content('[data-role="status"]').strip() == "بانتظار دورك")
         check("ticket: service arabic", page.text_content('[data-role="service-name"]').strip() == "الدعم التقني")
         check("ticket: step1 done", "done" in (page.get_attribute("#stepRequested", "class") or ""))
         check("ticket: eta arabic", "نحو" in page.text_content('[data-role="eta"]'))
         page.screenshot(path="/home/z/my-project/scripts/shots/ar_ticket.png", full_page=True)
 
+        # ---------- 6b. duplicate student id → friendly 409 ----------
+        page.goto(BASE + "/")
+        page.click('.service-card[data-service=it_support] .get-ticket')
+        page.fill("#customerName", "عبدالله")
+        page.fill("#studentId", "441002357")
+        page.click("#modalSubmit")
+        page.wait_for_timeout(1600)
+        err = page.text_content("#modalError") or ""
+        check("modal: duplicate id → arabic 409 message", ticket_no in err and "نشطة" in err)
+        page.click("#modalCancel")
+
         # ---------- 7. language toggle ON ticket page ----------
+        page.goto(BASE + "/ticket/" + ticket_no)
         page.click("#langToggle")
         page.wait_for_timeout(500)
         check("ticket: EN status", page.text_content('[data-role="status"]').strip() == "WAITING")
@@ -215,7 +238,8 @@ def run():
         check("zero JS page errors", not errors, "; ".join(errors[:3]))
         real_console = [e for e in console_errors
                         if "favicon" not in e.lower()
-                        and "(Not Found)" not in e]  # 404 page nav message is expected
+                        and "(Not Found)" not in e
+                        and "409 (Conflict)" not in e]  # 404 nav + intentional 409 dup are expected
         check("zero console errors", not real_console, "; ".join(real_console[:3]))
         check("zero failed sub-resources", not failed_resources, "; ".join(failed_resources[:3]))
 

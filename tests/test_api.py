@@ -155,3 +155,60 @@ def test_load_levels_endpoint(client):
     assert data["levels"] == ["NORMAL", "BUSY", "HIGH LOAD"]
     assert data["busy_threshold"] == 3
     assert data["high_threshold"] == 6
+
+
+def test_create_ticket_with_student_id(client):
+    """Student ID is stored and echoed back on ticket + pages."""
+    res = client.post(
+        "/api/tickets",
+        json={"service_code": SERVICE, "customer_name": "Nora", "student_id": "441002357"},
+    )
+    assert res.status_code == 201
+    ticket = res.get_json()["ticket"]
+    assert ticket["student_id"] == "441002357"
+    assert ticket["ticket_number"] == "IT-001"
+
+    # ticket page shows the student ID
+    page = client.get(f"/ticket/{ticket['ticket_number']}")
+    assert page.status_code == 200
+    assert b"441002357" in page.data
+
+    # admin + queue pages expose it too (server-rendered first paint)
+    for path in ("/admin", "/queue"):
+        page = client.get(path)
+        assert page.status_code == 200
+        assert b"441002357" in page.data
+
+
+def test_duplicate_active_student_id_rejected(client):
+    """One student cannot hold two active tickets for the same service."""
+    first = client.post(
+        "/api/tickets",
+        json={"service_code": SERVICE, "customer_name": "Sara", "student_id": "441999888"},
+    )
+    assert first.status_code == 201
+
+    dup = client.post(
+        "/api/tickets",
+        json={"service_code": SERVICE, "customer_name": "Sara", "student_id": "441999888"},
+    )
+    assert dup.status_code == 409
+    body = dup.get_json()
+    assert body["ticket"] == first.get_json()["ticket"]["ticket_number"]
+
+    # same student ID is fine on a DIFFERENT service
+    other = client.post(
+        "/api/tickets",
+        json={"service_code": "registration_support", "customer_name": "Sara", "student_id": "441999888"},
+    )
+    assert other.status_code == 201
+
+    # after the first ticket is done, the student can take a new ticket
+    number = first.get_json()["ticket"]["ticket_number"]
+    client.post(f"/api/tickets/{number}/status", json={"status": "SERVING"})
+    client.post(f"/api/tickets/{number}/status", json={"status": "DONE"})
+    again = client.post(
+        "/api/tickets",
+        json={"service_code": SERVICE, "customer_name": "Sara", "student_id": "441999888"},
+    )
+    assert again.status_code == 201

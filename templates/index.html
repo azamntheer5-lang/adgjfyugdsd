@@ -117,13 +117,18 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <h3 id="modalTitle" data-i18n="modal_title">إصدار تذكرة جديدة</h3>
     <p class="modal-service" id="modalService">—</p>
-    <form id="ticketForm">
+    <form id="ticketForm" novalidate>
       <label for="customerName">
         <span data-i18n="modal_name">الاسم</span>
-        <span class="muted">(<span data-i18n="modal_optional">اختياري</span>)</span>
       </label>
       <input id="customerName" name="customer_name" type="text" maxlength="60"
              autocomplete="off" placeholder="مثال: عبدالله" data-i18n-ph="modal_ph">
+      <label for="studentId">
+        <span data-i18n="modal_student_id">الرقم الجامعي</span>
+      </label>
+      <input id="studentId" name="student_id" type="text" inputmode="numeric"
+             maxlength="15" autocomplete="off"
+             placeholder="مثال: 441002357" data-i18n-ph="modal_ph_id">
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" id="modalCancel" data-i18n="modal_cancel">إلغاء</button>
         <button type="submit" class="btn btn-primary" id="modalSubmit" data-i18n="modal_submit">أصدر التذكرة</button>

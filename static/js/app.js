@@ -53,6 +53,12 @@ const I18N = {
     modal_name: "الاسم",
     modal_optional: "اختياري",
     modal_ph: "مثال: عبدالله",
+    modal_student_id: "الرقم الجامعي",
+    modal_ph_id: "مثال: 441002357",
+    modal_submitting: "جارٍ إصدار التذكرة…",
+    val_name: "فضلاً أدخل الاسم أولًا",
+    val_id: "فضلاً أدخل رقمًا جامعيًا صحيحًا (أرقام فقط، 4–15 رقمًا)",
+    dup_active: "هذا الرقم الجامعي لديه تذكرة نشطة بالفعل لهذه الخدمة:",
     modal_cancel: "إلغاء",
     modal_submit: "أصدر التذكرة",
     modal_error_prefix: "خطأ: ",
@@ -62,6 +68,8 @@ const I18N = {
     tk_ahead: "أمامك الآن",
     tk_eta: "الانتظار المتوقع",
     tk_created: "وقت الإصدار",
+    tk_name: "الاسم",
+    tk_student_id: "الرقم الجامعي",
     tk_min: "دقيقة",
     approx: "نحو",
     step_requested: "طلبت التذكرة",
@@ -144,6 +152,12 @@ const I18N = {
     modal_name: "Your name",
     modal_optional: "optional",
     modal_ph: "e.g. Abdullah",
+    modal_student_id: "Student ID",
+    modal_ph_id: "e.g. 441002357",
+    modal_submitting: "Issuing ticket…",
+    val_name: "Please enter your name first",
+    val_id: "Please enter a valid student ID (digits only, 4-15 digits)",
+    dup_active: "This student ID already has an active ticket for this service:",
     modal_cancel: "Cancel",
     modal_submit: "Issue Ticket",
     modal_error_prefix: "Error: ",
@@ -153,6 +167,8 @@ const I18N = {
     tk_ahead: "People ahead",
     tk_eta: "Estimated wait",
     tk_created: "Issued at",
+    tk_name: "Name",
+    tk_student_id: "Student ID",
     tk_min: "min",
     approx: "~",
     step_requested: "Ticket requested",
@@ -333,7 +349,10 @@ async function fetchJSON(url, options) {
   try { body = await res.json(); } catch (e) { /* non-JSON error body */ }
   if (!res.ok) {
     const message = body && body.error ? body.error : "HTTP " + res.status;
-    throw new Error(message);
+    const err = new Error(message);
+    err.status = res.status;
+    err.body = body;
+    throw err;
   }
   return body;
 }
@@ -415,6 +434,7 @@ function initTicketModal() {
   if (!modal) return;
   const form = document.getElementById("ticketForm");
   const nameInput = document.getElementById("customerName");
+  const idInput = document.getElementById("studentId");
   const errorEl = document.getElementById("modalError");
 
   document.querySelectorAll(".get-ticket").forEach((btn) => {
@@ -443,22 +463,45 @@ function initTicketModal() {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const submit = document.getElementById("modalSubmit");
-    submit.disabled = true;
     errorEl.hidden = true;
+
+    const name = nameInput.value.trim();
+    const sid = idInput.value.trim();
+    if (!name) {
+      errorEl.textContent = t("val_name");
+      errorEl.hidden = false;
+      nameInput.focus();
+      return;
+    }
+    if (!/^\d{4,15}$/.test(sid)) {
+      errorEl.textContent = t("val_id");
+      errorEl.hidden = false;
+      idInput.focus();
+      return;
+    }
+
+    submit.disabled = true;
+    submit.textContent = t("modal_submitting");
     try {
       const data = await fetchJSON("/api/tickets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           service_code: modalState.code,
-          customer_name: nameInput.value
+          customer_name: name,
+          student_id: sid
         })
       });
       window.location.href = "/ticket/" + encodeURIComponent(data.ticket.ticket_number);
     } catch (err) {
-      errorEl.textContent = t("modal_error_prefix") + err.message;
+      if (err.status === 409 && err.body && err.body.ticket) {
+        errorEl.textContent = t("dup_active") + " " + err.body.ticket;
+      } else {
+        errorEl.textContent = t("modal_error_prefix") + err.message;
+      }
       errorEl.hidden = false;
       submit.disabled = false;
+      submit.textContent = t("modal_submit");
     }
   });
 }
@@ -558,7 +601,7 @@ async function refreshQueueBoard() {
       ? rows.map((tk, i) => `<tr>
           <td>${i + 1}</td>
           <td class="mono">${escapeHtml(tk.ticket_number)}</td>
-          <td>${escapeHtml(tk.customer_name || "—")}</td>
+          <td>${escapeHtml(tk.customer_name || "—")}${tk.student_id ? ` <span class="mono muted">(${escapeHtml(tk.student_id)})</span>` : ""}</td>
           <td class="muted">${fmtTime(tk.created_at)}</td>
         </tr>`).join("")
       : `<tr class="empty-row"><td colspan="4">${t("empty_queue")}</td></tr>`;
@@ -595,7 +638,7 @@ async function refreshAdminCard(code) {
       const st = escapeHtml(tk.status);
       return `<tr data-number="${escapeHtml(tk.ticket_number)}">
         <td class="mono">${escapeHtml(tk.ticket_number)}</td>
-        <td>${escapeHtml(tk.customer_name || "—")}</td>
+        <td>${escapeHtml(tk.customer_name || "—")}${tk.student_id ? ` <span class="mono muted">(${escapeHtml(tk.student_id)})</span>` : ""}</td>
         <td><span class="status-pill status-${st.toLowerCase()}" data-status="${st}">${statusLabel(tk.status)}</span></td>
         <td class="row-actions">${actions}</td>
       </tr>`;

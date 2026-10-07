@@ -182,13 +182,20 @@ curl http://127.0.0.1:5000/healthz
 curl http://127.0.0.1:5000/api/services
 curl -X POST http://127.0.0.1:5000/api/tickets \
      -H "Content-Type: application/json" \
-     -d '{"service_code": "it_support", "customer_name": "Ali"}'
+     -d '{"service_code": "it_support", "customer_name": "Ali", "student_id": "441002357"}'
 curl "http://127.0.0.1:5000/api/tickets?service_code=it_support&status=WAITING"
 curl -X POST http://127.0.0.1:5000/api/services/it_support/next      # مناداة التالي
 curl -X POST http://127.0.0.1:5000/api/tickets/IT-001/status \
      -H "Content-Type: application/json" -d '{"status": "DONE"}'
 curl -X POST http://127.0.0.1:5000/api/demo/reset                    # تصفير للعرض
 ```
+
+## الرقم الجامعي والتذاكر الفريدة
+
+- نموذج إصدار التذكرة يطلب **الاسم + الرقم الجامعي** (تحقق فوري بلغة الواجهة).
+- كل تذكرة تحمل **رقمًا فريدًا لا يتكرر** بصيغة `IT-001 / AA-002 / RS-003 / SS-004` — عدّاد ذري لكل خدمة وقيد UNIQUE في القاعدة.
+- الرقم الجامعي نفسه لا يقبل تذكرتين نشطتين (WAITING/SERVING) لنفس الخدمة — الرد 409 مع رقم التذكرة القائمة، وبعد إكمالها أو إلغائها يمكن للطالب أخذ تذكرة جديدة. (اختياري في الـ API لأدوات الضغط، مطلوب في الواجهة.)
+- الرقم الجامعي يظهر في صفحة التذكرة ولوحة الطابور ولوحة الموظف.
 
 ## طريقة تجربة NORMAL / BUSY / HIGH LOAD (سيناريو العرض)
 

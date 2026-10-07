@@ -19,6 +19,16 @@ from .load_status import compute_load, highest_level, load_percent
 
 TICKET_STATUSES = ("WAITING", "SERVING", "DONE", "CANCELLED")
 
+
+class DuplicateActiveTicket(ValueError):
+    """Raised when a student ID already holds an active ticket for a service.
+
+    Raised inside the creation transaction so the check is atomic under
+    concurrent workers: BEGIN IMMEDIATE serialises writers, so two requests
+    with the same student ID cannot both pass the guard.
+    """
+
+
 VALID_TRANSITIONS = {
     ("WAITING", "SERVING"),
     ("WAITING", "CANCELLED"),
@@ -89,8 +99,15 @@ def get_service(identifier):
 # ------------------------------------------------------------------- tickets
 
 
-def create_ticket(service_id: int, customer_name: str = ""):
-    """Issue the next ticket for a service (atomic counter + insert)."""
+def create_ticket(service_id: int, customer_name: str = "", student_id: str = ""):
+    """Issue the next ticket for a service (atomic counter + insert).
+
+    ``student_id`` is optional at the API level (load tests and scripts use
+    the bare form); when provided, an active (WAITING/SERVING) ticket for the
+    same service and student raises DuplicateActiveTicket so one student
+    cannot hold two live tickets for the same counter.
+    """
+    student_id = (student_id or "").strip()
     conn = get_conn()
     conn.execute("BEGIN IMMEDIATE")
     try:
@@ -100,6 +117,16 @@ def create_ticket(service_id: int, customer_name: str = ""):
         if svc is None:
             conn.execute("ROLLBACK")
             return None
+        if student_id:
+            dup = conn.execute(
+                "SELECT ticket_number FROM tickets "
+                "WHERE service_id = ? AND student_id = ? "
+                "AND status IN ('WAITING', 'SERVING') LIMIT 1",
+                (service_id, student_id),
+            ).fetchone()
+            if dup is not None:
+                conn.execute("ROLLBACK")
+                raise DuplicateActiveTicket(dup["ticket_number"])
         counter = conn.execute(
             "SELECT last_number FROM service_counters WHERE service_id = ?",
             (service_id,),
@@ -111,9 +138,9 @@ def create_ticket(service_id: int, customer_name: str = ""):
             (next_number, service_id),
         )
         conn.execute(
-            "INSERT INTO tickets (ticket_number, service_id, customer_name) "
-            "VALUES (?, ?, ?)",
-            (ticket_number, service_id, (customer_name or "").strip()),
+            "INSERT INTO tickets (ticket_number, service_id, customer_name, student_id) "
+            "VALUES (?, ?, ?, ?)",
+            (ticket_number, service_id, (customer_name or "").strip(), student_id),
         )
         conn.execute("COMMIT")
     except sqlite3.Error:
@@ -127,7 +154,7 @@ def get_ticket(ticket_number: str):
     conn = get_conn()
     row = conn.execute(
         """
-        SELECT t.id, t.ticket_number, t.service_id, t.customer_name, t.status,
+        SELECT t.id, t.ticket_number, t.service_id, t.customer_name, t.student_id, t.status,
                t.created_at, t.called_at, t.finished_at,
                s.code AS service_code, s.name AS service_name, s.prefix
         FROM tickets t JOIN services s ON s.id = t.service_id
@@ -182,7 +209,7 @@ def list_tickets(service_id=None, status=None, limit: int = 50, waiting_first=Fa
     args.append(int(limit))
     rows = conn.execute(
         f"""
-        SELECT t.id, t.ticket_number, t.service_id, t.customer_name, t.status,
+        SELECT t.id, t.ticket_number, t.service_id, t.customer_name, t.student_id, t.status,
                t.created_at, t.called_at, t.finished_at,
                s.code AS service_code, s.name AS service_name, s.prefix
         FROM tickets t JOIN services s ON s.id = t.service_id

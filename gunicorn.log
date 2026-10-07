@@ -1,0 +1,8 @@
+[2026-10-07 02:09:24 +0000] [20447] [INFO] Starting gunicorn 26.2.0
+[2026-10-07 02:09:24 +0000] [20447] [INFO] Listening at: http://0.0.0.0:5000 (20447)
+[2026-10-07 02:09:24 +0000] [20447] [INFO] Using worker: gthread
+[2026-10-07 02:09:24 +0000] [20448] [INFO] Booting worker with pid: 20448
+[2026-10-07 02:09:24 +0000] [20449] [INFO] Booting worker with pid: 20449
+[2026-10-07 02:09:24 +0000] [20450] [INFO] Booting worker with pid: 20450
+[2026-10-07 02:09:24 +0000] [20451] [INFO] Booting worker with pid: 20451
+[2026-10-07 02:09:24 +0000] [20447] [INFO] Control socket listening at /home/z/.gunicorn/gunicorn.ctl

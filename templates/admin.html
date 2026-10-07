@@ -61,7 +61,7 @@
         {% for t in section.tickets %}
         <tr data-number="{{ t.ticket_number }}">
           <td class="mono">{{ t.ticket_number }}</td>
-          <td>{{ t.customer_name or '—' }}</td>
+          <td>{{ t.customer_name or '—' }}{% if t.student_id %} <span class="mono muted">({{ t.student_id }})</span>{% endif %}</td>
           <td><span class="status-pill status-{{ t.status|lower }}" data-status="{{ t.status }}">{{ t.status }}</span></td>
           <td class="row-actions">
             {% if t.status == 'WAITING' %}

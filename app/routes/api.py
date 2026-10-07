@@ -65,7 +65,11 @@ def call_next(identifier):
 def create_ticket():
     """Issue a new queue ticket.
 
-    Body (JSON or form): {"service_code": "it_support", "customer_name": "Ali"}
+    Body (JSON or form): {"service_code": "it_support", "customer_name": "Ali",
+                          "student_id": "441002357"}
+    ``student_id`` is optional (name-only tickets stay valid for scripts and
+    load tests). When provided and the student already holds an active
+    ticket for the same service, returns 409 with the existing ticket.
     """
     payload = request.get_json(silent=True)
     if payload is None:
@@ -76,8 +80,21 @@ def create_ticket():
     if service is None:
         return _error("service not found", 404)
     customer_name = (payload.get("customer_name") or "").strip()
+    student_id = (payload.get("student_id") or "").strip()
     try:
-        ticket = models.create_ticket(service["id"], customer_name)
+        ticket = models.create_ticket(service["id"], customer_name, student_id)
+    except models.DuplicateActiveTicket as exc:
+        existing = str(exc)
+        return (
+            jsonify(
+                {
+                    "error": "this student_id already has an active ticket "
+                    f"for {service['name']}: {existing}",
+                    "ticket": existing,
+                }
+            ),
+            409,
+        )
     except Exception:
         return _error("could not create ticket, please retry", 500)
     if ticket is None:

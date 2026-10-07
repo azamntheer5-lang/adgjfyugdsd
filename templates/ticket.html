@@ -28,6 +28,8 @@
     </div>
 
     <dl class="ticket-meta">
+      <div><dt data-i18n="tk_name">الاسم</dt><dd data-role="customer">{{ ticket.customer_name or '—' }}</dd></div>
+      <div><dt data-i18n="tk_student_id">الرقم الجامعي</dt><dd data-role="student-id" class="mono">{{ ticket.student_id or '—' }}</dd></div>
       <div><dt data-i18n="tk_ahead">أمامك الآن</dt><dd data-role="ahead">{{ ticket.people_ahead }}</dd></div>
       <div><dt data-i18n="tk_eta">الانتظار المتوقع</dt><dd data-role="eta">~{{ ticket.estimated_wait_minutes }} <span data-i18n="tk_min">دقيقة</span></dd></div>
       <div><dt data-i18n="tk_created">وقت الإصدار</dt><dd data-role="created">{{ ticket.created_at }}</dd></div>

@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS tickets (
     ticket_number TEXT NOT NULL UNIQUE,
     service_id    INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
     customer_name TEXT NOT NULL DEFAULT '',
+    student_id    TEXT NOT NULL DEFAULT '',
     status        TEXT NOT NULL DEFAULT 'WAITING'
                   CHECK (status IN ('WAITING', 'SERVING', 'DONE', 'CANCELLED')),
     created_at    TEXT NOT NULL DEFAULT (datetime('now')),
@@ -75,6 +76,14 @@ CREATE INDEX IF NOT EXISTS idx_tickets_service_status
 CREATE INDEX IF NOT EXISTS idx_tickets_created
     ON tickets (created_at);
 """
+
+# Kept out of SCHEMA so old databases can be migrated (ALTER) before the
+# index is created - otherwise executescript would reference a missing column.
+ACTIVE_STUDENT_INDEX = (
+    "CREATE INDEX IF NOT EXISTS idx_tickets_student_active"
+    " ON tickets (service_id, student_id)"
+    " WHERE status IN ('WAITING', 'SERVING')"
+)
 
 
 def _apply_pragmas(conn: sqlite3.Connection) -> None:
@@ -129,15 +138,28 @@ def init_app(app):
     app.teardown_appcontext(close_db)
 
 
+def _column_exists(conn: sqlite3.Connection, table: str, column: str) -> bool:
+    rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    return any(r["name"] == column for r in rows)
+
+
 def init_db():
     """Create tables (if missing) and seed the four services.
 
     Safe under the multi-worker boot race: BEGIN IMMEDIATE serialises the
     seed transaction, and INSERT OR IGNORE keeps a second worker that
     already sees rows from a crashing UNIQUE violation.
+
+    Migration: databases created before the student-ID feature get the
+    new column via ALTER TABLE, then the partial active-ticket index is
+    created (kept out of executescript so old schemas never reference a
+    missing column).
     """
     conn = get_conn()
     conn.executescript(SCHEMA)
+    if not _column_exists(conn, "tickets", "student_id"):
+        conn.execute("ALTER TABLE tickets ADD COLUMN student_id TEXT NOT NULL DEFAULT ''")
+    conn.execute(ACTIVE_STUDENT_INDEX)
     row = conn.execute("SELECT COUNT(*) AS c FROM services").fetchone()
     if row["c"] == 0:
         conn.execute("BEGIN IMMEDIATE")

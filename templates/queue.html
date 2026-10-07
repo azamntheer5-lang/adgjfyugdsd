@@ -46,7 +46,7 @@
         <tr>
           <td>{{ loop.index }}</td>
           <td class="mono">{{ t.ticket_number }}</td>
-          <td>{{ t.customer_name or '—' }}</td>
+          <td>{{ t.customer_name or '—' }}{% if t.student_id %} <span class="mono muted">({{ t.student_id }})</span>{% endif %}</td>
           <td class="muted">{{ t.created_at }}</td>
         </tr>
         {% else %}
