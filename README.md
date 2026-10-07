@@ -11,7 +11,7 @@
 
 ## النشر بنقرة واحدة (رابط دائم حقيقي)
 
-[![Deploy to Render](https://render.com/images/deploy-button.svg)](https://render.com/deploy?repo=https://github.com/azamntheer5-lang/adgjfyugdsd)
+[![Deploy to Render](https://img.shields.io/badge/Deploy_to_Render-4630E2?style=for-the-badge&logo=render&logoColor=white)](https://render.com/deploy?repo=https://github.com/azamntheer5-lang/adgjfyugdsd)
 
 زر واحد → رابط عام دائم `https://<service>.onrender.com` (خطة مجانية).
 الإعدادات كاملة في `render.yaml`: Gunicorn 4×2 + فحص صحة `/healthz` + عتبات الحالة.
