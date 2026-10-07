@@ -9,6 +9,15 @@
 
 ---
 
+## النشر بنقرة واحدة (رابط دائم حقيقي)
+
+[![Deploy to Render](https://render.com/images/deploy-button.svg)](https://render.com/deploy?repo=https://github.com/azamntheer5-lang/adgjfyugdsd)
+
+زر واحد → رابط عام دائم `https://<service>.onrender.com` (خطة مجانية).
+الإعدادات كاملة في `render.yaml`: Gunicorn 4×2 + فحص صحة `/healthz` + عتبات الحالة.
+
+---
+
 ## فكرة المشروع
 
 منصة سحابية تدير طوابير الانتظار للخدمات التي تستقبل أعدادًا كبيرة من المستخدمين في
