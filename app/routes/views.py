@@ -1,10 +1,17 @@
 """HTML page routes (server-rendered first paint, then live updates via JS)."""
 
-from flask import Blueprint, render_template
+from flask import Blueprint, current_app, render_template, send_from_directory
 
 from .. import models
 
 views_bp = Blueprint("views", __name__)
+
+
+@views_bp.get("/favicon.ico")
+def favicon():
+    """Serve the gold cloud icon so browsers get no 404."""
+    return send_from_directory(current_app.static_folder, "favicon.ico",
+                               mimetype="image/x-icon")
 
 
 @views_bp.get("/")

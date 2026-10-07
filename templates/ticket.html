@@ -1,47 +1,54 @@
 {% extends "base.html" %}
-{% block title %}Ticket {{ ticket.ticket_number }} · CrowdCloud{% endblock %}
+{% block title %}تذكرة {{ ticket.ticket_number }} · كراود كلاود{% endblock %}
 
 {% block content %}
+{% set svc_names = {
+  'academic_advising':   'الإرشاد الأكاديمي',
+  'it_support':          'الدعم التقني',
+  'registration_support':'دعم التسجيل',
+  'student_services':    'خدمات الطلاب'
+} %}
 <section class="ticket-page" id="ticketPage"
          data-ticket="{{ ticket.ticket_number }}">
-  <a class="back-link" href="{{ url_for('views.index') }}">&larr; All services</a>
+  <a class="back-link" href="{{ url_for('views.index') }}">
+    <span class="arrow">←</span>
+    <span data-i18n="back_services">كل الخدمات</span>
+  </a>
 
   <article class="ticket-card" id="ticketCard">
     <header>
-      <span class="ticket-service" data-role="service-name">{{ ticket.service_name }}</span>
+      <span class="ticket-service" data-role="service-name" data-svc-ticket="{{ ticket.service_code }}">{{ svc_names.get(ticket.service_code, ticket.service_name) }}</span>
       <h1 class="ticket-number" data-role="number">{{ ticket.ticket_number }}</h1>
-      <p class="ticket-sub">Your queue ticket</p>
+      <p class="ticket-sub" data-i18n="ticket_sub">تذكرة الطابور الخاصة بك</p>
     </header>
 
     <div class="ticket-state">
-      <span class="status-pill" data-role="status">{{ ticket.status }}</span>
-      <span class="load-badge" data-role="load">{{ ticket.load }}</span>
+      <span class="status-pill" data-role="status" data-status="{{ ticket.status }}">{{ ticket.status }}</span>
+      <span class="load-badge" data-role="load" data-load="{{ ticket.load }}">{{ ticket.load }}</span>
     </div>
 
     <dl class="ticket-meta">
-      <div><dt>People ahead of you</dt><dd data-role="ahead">{{ ticket.people_ahead }}</dd></div>
-      <div><dt>Estimated wait</dt><dd data-role="eta">~{{ ticket.estimated_wait_minutes }} min</dd></div>
-      <div><dt>Issued at</dt><dd data-role="created">{{ ticket.created_at }}</dd></div>
+      <div><dt data-i18n="tk_ahead">أمامك الآن</dt><dd data-role="ahead">{{ ticket.people_ahead }}</dd></div>
+      <div><dt data-i18n="tk_eta">الانتظار المتوقع</dt><dd data-role="eta">~{{ ticket.estimated_wait_minutes }} <span data-i18n="tk_min">دقيقة</span></dd></div>
+      <div><dt data-i18n="tk_created">وقت الإصدار</dt><dd data-role="created">{{ ticket.created_at }}</dd></div>
     </dl>
 
     <ol class="timeline">
-      <li class="done" id="stepRequested"><span>Requested</span></li>
-      <li id="stepServing"><span>Called to counter</span></li>
-      <li id="stepDone"><span>Served</span></li>
+      <li class="done" id="stepRequested"><span data-i18n="step_requested">طلبت التذكرة</span></li>
+      <li id="stepServing"><span data-i18n="step_serving">نُودي على دورك</span></li>
+      <li id="stepDone"><span data-i18n="step_done">تمت الخدمة</span></li>
     </ol>
 
-    <p class="ticket-note">
-      This page refreshes automatically every few seconds. The estimated wait
-      assumes an average handling time of 2 minutes per customer at the counter
-      (a configurable assumption, not a measured value).
+    <p class="ticket-note" data-i18n="ticket_note">
+      تُحدَّث هذه الصفحة تلقائيًا كل بضع ثوانٍ. الانتظار المتوقع يفترض متوسط خدمة
+      دقيقتين للعميل الواحد عند الشبّاك (فرضية قابلة للضبط، وليست قياسًا فعليًا).
     </p>
 
     <div class="ticket-actions">
       <button type="button" class="btn btn-danger" id="cancelBtn"
-              data-url="{{ url_for('api.cancel_ticket', ticket_number=ticket.ticket_number) }}">
-        Cancel my ticket
-      </button>
-      <a class="btn btn-ghost" href="{{ url_for('views.queue_board') }}">Queue board</a>
+              data-url="{{ url_for('api.cancel_ticket', ticket_number=ticket.ticket_number) }}"
+              data-i18n="tk_cancel">إلغاء تذكرتي</button>
+      <a class="btn btn-ghost" href="{{ url_for('views.queue_board') }}" data-i18n="nav_queue">لوحة الطابور</a>
     </div>
   </article>
 </section>

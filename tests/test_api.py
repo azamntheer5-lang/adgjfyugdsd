@@ -32,10 +32,12 @@ def test_healthz(client):
 
 
 def test_html_pages_render(client):
+    # Arabic is the primary UI language (English is secondary, via JS toggle).
     for path in ("/", "/queue", "/admin"):
         res = client.get(path)
         assert res.status_code == 200
-        assert b"CrowdCloud" in res.data
+        assert "كراود كلاود".encode("utf-8") in res.data
+        assert b'dir="rtl"' in res.data
 
 
 def test_create_ticket_flow(client):
